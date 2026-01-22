@@ -10,7 +10,7 @@ __pycache__/
 *.pyc
 .env
 venv/
-
+.env.local
 # OS
 .DS_Store
 Thumbs.db

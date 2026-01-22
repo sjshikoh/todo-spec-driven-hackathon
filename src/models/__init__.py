@@ -9,17 +9,19 @@ class Task:
 
     Attributes:
         id (int): Unique identifier for the task
+        user_id (str): User ID of the task owner
         title (str): Title of the task (required)
         description (str): Description of the task (optional)
         completed (bool): Completion status of the task
     """
 
-    def __init__(self, task_id, title, description="", completed=False):
+    def __init__(self, task_id, user_id, title, description="", completed=False):
         """
         Initialize a new Task object.
 
         Args:
             task_id (int): Unique identifier for the task
+            user_id (str): User ID of the task owner
             title (str): Title of the task (required)
             description (str): Description of the task (optional)
             completed (bool): Completion status of the task (default: False)
@@ -31,6 +33,7 @@ class Task:
             raise ValueError("Task title cannot be empty or contain only whitespace")
 
         self.id = task_id
+        self.user_id = user_id
         self.title = title.strip()
         self.description = description.strip() if description else ""
         self.completed = completed
