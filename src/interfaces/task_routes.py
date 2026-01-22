@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request
 from pydantic import BaseModel
 from sqlmodel import Session
 
-from src.auth.jwt import get_current_user_id
+from src.auth.temp_auth import get_current_user_id_temp
 from src.db.database import get_session
 from src.services.task_service import TaskService
 from src.models.task import Task
@@ -68,7 +68,7 @@ async def get_current_user(request: Request) -> str:
     Dependency that extracts user ID from JWT in request headers.
     All protected routes must use this dependency.
     """
-    return get_current_user_id(request)
+    return get_current_user_id_temp(request)
 
 
 # ============ Routes ============

@@ -16,6 +16,8 @@ from pydantic import BaseModel
 
 from src.db.database import init_db
 from src.interfaces.task_routes import router as task_router
+from src.interfaces.auth_routes import router as auth_router
+from src.interfaces.auth_routes import router as auth_router
 
 
 # ============ Configuration ============
@@ -50,6 +52,14 @@ async def root():
     """Root endpoint - API health check."""
     return MessageResponse(message="Todo API is running")
 
+
+# ============ Temporary Auth Routes (for development) ============
+# These will be replaced by Better Auth JWKS verification
+app.include_router(auth_router)
+
+# ============ Temporary Auth Routes (for development) ============
+# These will be replaced by Better Auth JWKS verification
+app.include_router(auth_router)
 
 # ============ Task Routes ============
 
