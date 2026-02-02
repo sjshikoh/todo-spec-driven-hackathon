@@ -42,7 +42,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (response.ok) {
         const data = await response.json();
-        setUser(data.user);
+        // /auth/me returns user object directly, not wrapped
+        setUser(data);
       } else {
         // Token is invalid, clear it
         localStorage.removeItem('auth-token');

@@ -2,15 +2,14 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/components/AuthProvider';
 import { useRouter } from 'next/navigation';
+import { authApi } from '@/lib/api';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -19,10 +18,11 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await login(email, password);
+      await authApi.signin({ email, password });
+      // Force a hard navigation to initialize auth state in the provider
+      window.location.href = '/dashboard';
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
-    } finally {
       setLoading(false);
     }
   };

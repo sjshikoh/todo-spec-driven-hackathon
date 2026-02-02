@@ -13,7 +13,7 @@ class Task(SQLModel, table=True):
     Each task belongs to a specific user (enforced via user_id).
     """
     id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: str = Field(index=True, nullable=False)
+    user_id: str = Field(index=True, nullable=False, foreign_key="user.id")
     title: str = Field(max_length=255, nullable=False)
     description: str = Field(default="", nullable=False)
     completed: bool = Field(default=False, nullable=False)

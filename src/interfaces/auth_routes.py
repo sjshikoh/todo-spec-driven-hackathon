@@ -4,10 +4,15 @@ These will be replaced by Better Auth integration.
 """
 
 import secrets
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Header, Depends
+from typing import Optional
 from pydantic import BaseModel
+from sqlmodel import Session, select
+import uuid
 
 from src.auth.temp_jwt import create_temp_token
+from src.db.database import get_session
+from src.models.user import User
 
 
 # ============ Pydantic Models ============
@@ -40,10 +45,6 @@ class UserResponse(BaseModel):
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-# ============ In-memory user storage ============
-_users_db = {}
-
-
 # ============ Password Utilities ============
 
 def hash_password(password: str) -> str:
@@ -60,65 +61,63 @@ def verify_password(password: str, hashed: str) -> bool:
 # ============ Routes ============
 
 @router.post("/sign-up", response_model=AuthResponse)
-async def sign_up(data: SignUpRequest):
+async def sign_up(data: SignUpRequest, session: Session = Depends(get_session)):
     """Temporary sign-up endpoint for development."""
     # Check if user already exists
-    for user in _users_db.values():
-        if user["email"] == data.email:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already registered"
-            )
+    statement = select(User).where(User.email == data.email)
+    existing_user = session.exec(statement).first()
 
-    user_id = secrets.token_hex(16)
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered"
+        )
+
     hashed_password = hash_password(data.password)
 
-    user = {
-        "id": user_id,
-        "email": data.email,
-        "name": data.name,
-        "password": hashed_password,
-    }
+    # Create new user
+    user = User(
+        email=data.email,
+        name=data.name,
+        password=hashed_password
+    )
 
-    _users_db[user_id] = user
-    token = create_temp_token(user_id, data.email, data.name)
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+
+    token = create_temp_token(user.id, user.email, user.name)
 
     return AuthResponse(
         message="User registered successfully",
         token=token,
-        user={"id": user_id, "email": data.email, "name": data.name}
+        user={"id": user.id, "email": user.email, "name": user.name}
     )
 
 
 @router.post("/sign-in", response_model=AuthResponse)
-async def sign_in(data: SignInRequest):
+async def sign_in(data: SignInRequest, session: Session = Depends(get_session)):
     """Temporary sign-in endpoint for development."""
-    user = None
-    user_id = None
+    statement = select(User).where(User.email == data.email)
+    user = session.exec(statement).first()
 
-    for uid, u in _users_db.items():
-        if u["email"] == data.email:
-            user = u
-            user_id = uid
-            break
-
-    if not user or not verify_password(data.password, user["password"]):
+    if not user or not verify_password(data.password, user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
         )
 
-    token = create_temp_token(user_id, user["email"], user["name"])
+    token = create_temp_token(user.id, user.email, user.name)
 
     return AuthResponse(
         message="Login successful",
         token=token,
-        user={"id": user_id, "email": user["email"], "name": user["name"]}
+        user={"id": user.id, "email": user.email, "name": user.name}
     )
 
 
 @router.get("/me", response_model=UserResponse)
-async def get_me(authorization: str):
+async def get_me(authorization: Optional[str] = Header(None), session: Session = Depends(get_session)):
     """Temporary endpoint to get current user."""
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(
@@ -137,15 +136,20 @@ async def get_me(authorization: str):
         )
 
     user_id = payload.get("sub")
-    if not user_id or user_id not in _users_db:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found"
-        )
 
-    user = _users_db[user_id]
+    if user_id:
+        user = session.get(User, user_id)
+        if user:
+            return UserResponse(
+                id=user.id,
+                email=user.email,
+                name=user.name
+            )
+
+    # Fallback to JWT payload if user not found in DB (should theoretically not happen if consistent)
+    # or to handle cases where we want to trust the token temporarily
     return UserResponse(
-        id=user["id"],
-        email=user["email"],
-        name=user["name"]
+        id=payload.get("sub", ""),
+        email=payload.get("email", ""),
+        name=payload.get("name", "")
     )

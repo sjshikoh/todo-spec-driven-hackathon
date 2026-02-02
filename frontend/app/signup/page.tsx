@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/components/AuthProvider';
+import { authApi } from '@/lib/api';
 
 export default function SignupPage() {
   const [name, setName] = useState('');
@@ -11,7 +11,6 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signup } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,10 +29,11 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      await signup(email, password, name);
+      await authApi.signup({ email, password, name });
+      // Force a hard navigation to initialize auth state in the provider
+      window.location.href = '/dashboard';
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Signup failed');
-    } finally {
       setLoading(false);
     }
   };

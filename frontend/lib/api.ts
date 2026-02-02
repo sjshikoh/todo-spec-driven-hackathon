@@ -22,6 +22,22 @@ export interface MessageResponse {
   message: string;
 }
 
+export interface AuthResponse {
+  message: string;
+  token: string;
+  user: {
+    id: string;
+    email: string;
+    name: string;
+  };
+}
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+}
+
 async function handleResponse(response: Response) {
   if (!response.ok) {
     const error = await response.json().catch(() => ({ detail: 'An error occurred' }));
@@ -103,5 +119,59 @@ export const api = {
       method: 'POST',
     });
     return handleResponse(response);
+  },
+};
+
+// Auth API - Simple JWT authentication
+export const authApi = {
+  // Sign up a new user
+  async signup({ email, password, name }: { email: string; password: string; name: string }): Promise<AuthResponse> {
+    const response = await fetch(`${API_BASE_URL}/auth/sign-up`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, name }),
+    });
+    const data = await handleResponse(response);
+    // Store token on successful signup
+    if (data.token) {
+      localStorage.setItem('auth-token', data.token);
+    }
+    return data;
+  },
+
+  // Sign in an existing user
+  async signin({ email, password }: { email: string; password: string }): Promise<AuthResponse> {
+    const response = await fetch(`${API_BASE_URL}/auth/sign-in`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await handleResponse(response);
+    // Store token on successful signin
+    if (data.token) {
+      localStorage.setItem('auth-token', data.token);
+    }
+    return data;
+  },
+
+  // Get current user
+  async me(): Promise<User> {
+    const response = await fetchWithAuth('/auth/me');
+    return handleResponse(response);
+  },
+
+  // Logout - remove token
+  logout(): void {
+    localStorage.removeItem('auth-token');
+  },
+
+  // Check if user is authenticated
+  isAuthenticated(): boolean {
+    return typeof window !== 'undefined' && !!localStorage.getItem('auth-token');
+  },
+
+  // Get token
+  getToken(): string | null {
+    return typeof window !== 'undefined' ? localStorage.getItem('auth-token') : null;
   },
 };

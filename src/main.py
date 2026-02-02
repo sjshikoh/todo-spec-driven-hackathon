@@ -17,7 +17,6 @@ from pydantic import BaseModel
 from src.db.database import init_db
 from src.interfaces.task_routes import router as task_router
 from src.interfaces.auth_routes import router as auth_router
-from src.interfaces.auth_routes import router as auth_router
 
 
 # ============ Configuration ============
@@ -31,12 +30,18 @@ app = FastAPI(
 
 # ============ CORS Middleware ============
 
+# Get allowed origins from environment variable
+allowed_origins = os.environ.get("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8000")
+# Split comma-separated string into list
+origins_list = [origin.strip() for origin in allowed_origins.split(",")]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins_list,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["Content-Length", "Content-Type"],
 )
 
 
@@ -53,12 +58,7 @@ async def root():
     return MessageResponse(message="Todo API is running")
 
 
-# ============ Temporary Auth Routes (for development) ============
-# These will be replaced by Better Auth JWKS verification
-app.include_router(auth_router)
-
-# ============ Temporary Auth Routes (for development) ============
-# These will be replaced by Better Auth JWKS verification
+# ============ Auth Routes ============
 app.include_router(auth_router)
 
 # ============ Task Routes ============

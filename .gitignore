@@ -8,9 +8,43 @@ dist/
 # Python
 __pycache__/
 *.pyc
-.env
+*.pyo
+*.pyd
+.Python
 venv/
+env/
+.env
 .env.local
+.env.production
+.env.development
+.env.test
+*.env
+.env.*.local
+.env.*.example
+
+# Virtual Environments
+.venv/
+venv*/
+env*/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+tasks.db
+
+# Docker
+docker-compose.override.yml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
 # OS
 .DS_Store
 Thumbs.db

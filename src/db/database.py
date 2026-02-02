@@ -34,4 +34,8 @@ def get_session() -> Generator[Session, None, None]:
 def init_db() -> None:
     """Initialize database tables."""
     from src.models.task import Task
+    from src.models.user import User
+
+    # Create tables for both models
     Task.metadata.create_all(engine)
+    User.metadata.create_all(engine)
