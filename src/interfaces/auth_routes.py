@@ -13,6 +13,7 @@ import uuid
 from src.auth.temp_jwt import create_temp_token
 from src.db.database import get_session
 from src.models.user import User
+from src.core.security import hash_password, verify_password
 
 
 # ============ Pydantic Models ============
@@ -43,19 +44,6 @@ class UserResponse(BaseModel):
 # ============ Router ============
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-
-
-# ============ Password Utilities ============
-
-def hash_password(password: str) -> str:
-    """Simple password hashing for development."""
-    import hashlib
-    return hashlib.sha256(password.encode()).hexdigest()
-
-
-def verify_password(password: str, hashed: str) -> bool:
-    """Verify password against hash."""
-    return hash_password(password) == hashed
 
 
 # ============ Routes ============

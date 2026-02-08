@@ -43,7 +43,7 @@ Create `.env` file in project root:
 DATABASE_URL=postgresql://username:password@ep-example.neon.tech/neondb?sslmode=require
 
 # Auth Configuration
-BETTER_AUTH_URL=https://your-frontend-domain.com
+# BETTER_AUTH_URL=https://your-frontend-domain.com
 
 # Server Configuration
 HOST=0.0.0.0
@@ -56,8 +56,8 @@ ALLOWED_ORIGINS=https://your-frontend-domain.com
 ENVIRONMENT=production
 LOG_LEVEL=INFO
 
-# Optional: JWT Configuration (if using custom JWT)
-# JWT_SECRET_KEY=your-secret-key-here
+# JWT Configuration (Required for persistence)
+JWT_SECRET=your-production-secret-here
 # JWT_ALGORITHM=HS256
 ```
 
@@ -83,7 +83,7 @@ NEXTAUTH_SECRET=your-nextauth-secret
    # Change database service to use Neon
    environment:
      DATABASE_URL: ${DATABASE_URL}
-     BETTER_AUTH_URL: ${BETTER_AUTH_URL}
+     JWT_SECRET: ${JWT_SECRET}
    ```
 
 2. **Build and deploy**:
