@@ -34,10 +34,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    volumes:
-      - ./src:/app/src
-      - ./requirements.txt:/app/requirements.txt
-    command: python src/main.py
 
   # Next.js Frontend
   frontend:
