@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const response = await fetch('http://localhost:8000/auth/me', {
+      const response = await fetch('https://shajarain-todo-backend.hf.space/auth/me', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
