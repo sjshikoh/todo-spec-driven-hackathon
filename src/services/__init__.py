@@ -31,11 +31,12 @@ class TodoService:
             self._next_id += 1
         return self._next_id
 
-    def add_task(self, title: str, description: str = "") -> int:
+    def add_task(self, user_id: str, title: str, description: str = "") -> int:
         """
         Add a new task to the application.
 
         Args:
+            user_id (str): User ID of the task owner
             title (str): Title of the task (required)
             description (str): Description of the task (optional)
 
@@ -46,7 +47,7 @@ class TodoService:
             ValueError: If title is invalid
         """
         task_id = self._get_next_id()
-        task = Task(task_id, title, description, completed=False)
+        task = Task(task_id, user_id, title, description, completed=False)
         self._tasks[task_id] = task
         self._next_id = task_id + 1
         return task_id
@@ -62,6 +63,21 @@ class TodoService:
             Task: The task object if found, None otherwise
         """
         return self._tasks.get(task_id)
+
+    def get_user_tasks(self, user_id: str) -> List[Task]:
+        """
+        Retrieve all tasks for a specific user.
+
+        Args:
+            user_id (str): The user ID to filter tasks by
+
+        Returns:
+            List[Task]: List of task objects for the user, sorted by ID
+        """
+        return sorted(
+            [task for task in self._tasks.values() if task.user_id == user_id],
+            key=lambda x: x.id
+        )
 
     def get_all_tasks(self) -> List[Task]:
         """
@@ -89,15 +105,12 @@ class TodoService:
 
         task = self._tasks[task_id]
 
-        # Update title if provided
         if title is not None:
             if title and title.strip():
                 task.title = title.strip()
             elif title.strip() == "":
-                # If an empty title is provided, don't update
                 pass
 
-        # Update description if provided
         if description is not None:
             task.description = description.strip() if description else ""
 
