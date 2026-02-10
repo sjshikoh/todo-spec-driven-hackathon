@@ -18,6 +18,7 @@ from src.db.database import init_db
 from src.interfaces.task_routes import router as task_router
 from src.interfaces.auth_routes import router as auth_router
 from src.interfaces.ai_routes import router as ai_router
+from src.interfaces.chat_routes import router as chat_router
 from src.config import settings
 import logging
 
@@ -74,6 +75,9 @@ app.include_router(auth_router)
 # ============ Task Routes ============
 
 app.include_router(task_router)
+
+# ============ Chat Route ============
+app.include_router(chat_router)
 
 # ============ AI Routes (Phase III) ============
 

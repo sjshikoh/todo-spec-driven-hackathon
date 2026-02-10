@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const response = await fetch('http://localhost:8000/auth/sign-in', {
+    const response = await fetch('https://shajarain-todo-backend.hf.space/auth/sign-in', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -81,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signup = async (email: string, password: string, name: string) => {
-    const response = await fetch('http://localhost:8000/auth/sign-up', {
+    const response = await fetch('https://shajarain-todo-backend.hf.space/auth/sign-up', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
